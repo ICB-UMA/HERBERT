@@ -5,9 +5,6 @@
 **HERBERT** is a BERT-based bi-encoder for medical entity normalization in Spanish, leveraging hierarchical knowledge from UMLS to enhance candidate retrieval in medical entity linking (MEL) pipelines.  
 This repository contains the code, models, and resources to reproduce the results of the paper:
 
-> **HERBERT: Leveraging UMLS Hierarchical Knowledge to Enhance Clinical Entity Normalization in Spanish**  
-> *Fernando Gallego, Francisco J. Veredas*  
-> [Preprint / Journal link](enlace-a-tu-paper)
 
 - **Task:** Normalization of disease, procedure, and symptom mentions to SNOMED-CT/UMLS codes  
 - **Domain:** Spanish biomedical/clinical texts  
@@ -44,9 +41,18 @@ sentencepiece==0.2.0
 tokenizers==0.21.0
 torch==2.5.1
 ```
+**(You can find the full requirements in `requirements.txt`.)**
+
+Install dependencies with:
 
 ```bash
 git clone https://github.com/ICB-UMA/HERBERT.git
 cd HERBERT
 pip install -r requirements.txt
 ```
+
+## Quick Start
+
+### 1. Download Pretrained Models
+
+Model checkpoints will be available at [Hugging Face Model Hub](https://huggingface.co/ICB-UMA/) or in the [models/](models/) directory.
