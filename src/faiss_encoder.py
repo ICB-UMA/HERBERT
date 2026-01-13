@@ -4,8 +4,6 @@ from tqdm.auto import tqdm
 import numpy as np
 import faiss
 import pandas as pd
-from huggingface_hub import login
-from logger import setup_custom_logger
 from typing import List, Tuple, Dict, Optional
 
 
@@ -13,9 +11,6 @@ from typing import List, Tuple, Dict, Optional
 Author: Fernando Gallego, Guillermo López García & Luis Gasco Sánchez
 Affiliation: Researcher at the Computational Intelligence (ICB) Group, University of Málaga & Barcelona Supercomputing Center (BSC)
 """
-# Logger setup
-logger = setup_custom_logger("faiss_encoder")
-
 class FaissEncoder:
     """
     A class for encoding text using a pre-trained model and performing similarity search with FAISS indices.
@@ -50,7 +45,7 @@ class FaissEncoder:
             verbose (int): If 1, enables progress bars with tqdm. Defaults to 0.
         """
         self.model = AutoModel.from_pretrained(MODEL_NAME)
-        self.tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME)
+        self.tokenizer = AutoTokenizer.from_pretrained(MODEL_NAME, use_fast=False)
         self.f_type = F_TYPE
         self.vocab = vocab
         self.max_length = MAX_LENGTH if MAX_LENGTH else self.tokenizer.model_max_length
@@ -63,8 +58,6 @@ class FaissEncoder:
 
         if self.vocab is not None:
             self._initialize_vocab()
-        else:
-            logger.warning("Vocabulary is not initialized. Ensure to set a valid vocabulary before using dependent methods.")
 
     def _initialize_vocab(self) -> None:
         """Initializes attributes derived from the vocabulary."""
@@ -73,7 +66,6 @@ class FaissEncoder:
         self._arr_text = self.vocab['term'].tolist()
         self._arr_codes = self.vocab['code'].tolist()
         self._arr_text_id = np.arange(len(self.vocab))
-        logger.info("Vocabulary initialized successfully.")
 
     @property
     def arr_text(self) -> List[str]:
@@ -92,7 +84,6 @@ class FaissEncoder:
         if not hasattr(self, '_arr_text_id'):
             raise AttributeError("Vocabulary is not initialized. Use a valid vocabulary when creating the class.")
         return self._arr_text_id
-
     def encode(
         self,
         texts: List[str],
@@ -151,7 +142,6 @@ class FaissEncoder:
 
         self.faiss_index = faiss.IndexIDMap(index)
         self.faiss_index.add_with_ids(embeddings, self.arr_text_id)
-        logger.info("FAISS index fitted successfully.")
 
     def get_candidates(
         self,
@@ -216,26 +206,3 @@ class FaissEncoder:
 
         return candidates, candidates_codes, candidates_sims
     
-
-    def upload_to_hf(
-        self, 
-        repo_name: str, 
-        token: str = None, 
-        private: bool = True):
-        """
-        Uploads the current model and tokenizer to the Hugging Face Hub and can make the repository private.
-
-        Parameters:
-            repo_name (str): Name of the Hugging Face repository (e.g., "username/repo_name").
-            token (str): Hugging Face authentication token. If not provided, will prompt for login.
-            private (bool): Whether to make the repository private. Defaults to True.
-        """
-        if token:
-            login(token=token)
-        else:
-            login()  # Prompt for token if not provided
-
-        # Upload model and tokenizer to the specified Hugging Face repository with the private option
-        self.model.push_to_hub(repo_name, private=private)
-        self.tokenizer.push_to_hub(repo_name, private=private)
-        print(f"Model and tokenizer uploaded to the repository {repo_name} on Hugging Face (private={private}).")

@@ -1,13 +1,10 @@
 import pandas as pd
 from typing import Optional, List
-from logger import setup_custom_logger
-
 """
 Author: Fernando Gallego
 Affiliation: Researcher at the Computational Intelligence (ICB) Group, University of Málaga
 """
 
-logger = setup_custom_logger("triplets_generation")
 
 
 class TripletsGeneration:
@@ -37,7 +34,6 @@ class TripletsGeneration:
         if not required_columns.issubset(self.df.columns):
             missing = required_columns - set(self.df.columns)
             raise ValueError(f"DataFrame is missing required columns: {missing}")
-        logger.info("DataFrame validation successful.")
 
     def generate_triplets(self) -> pd.DataFrame:
         """
@@ -67,7 +63,6 @@ class TopHardTriplets(TripletsGeneration):
         Returns:
             pd.DataFrame: DataFrame containing anchor, positive, and negative columns.
         """
-        logger.info("Generating top-hard triplets...")
         results = []
         for _, row in self.df.iterrows():
             term = row['term']
@@ -86,7 +81,6 @@ class TopHardTriplets(TripletsGeneration):
                 for neg_text in negatives:
                     results.append((term, positive_text, neg_text))
 
-        logger.info(f"Generated {len(results)} triplets.")
         return pd.DataFrame(results, columns=["anchor", "positive", "negative"])
 
 
@@ -108,7 +102,6 @@ class SimilarityHardTriplets(TripletsGeneration):
         Returns:
             pd.DataFrame: DataFrame containing anchor, positive, and negative columns.
         """
-        logger.info(f"Generating similarity-based triplets with threshold: {similarity_threshold}...")
         results = []
         for _, row in self.df.iterrows():
             term = row['term']
@@ -127,5 +120,4 @@ class SimilarityHardTriplets(TripletsGeneration):
                 for i in negative_indices:
                     results.append((term, positive_text, candidate_texts[i]))
 
-        logger.info(f"Generated {len(results)} triplets.")
         return pd.DataFrame(results, columns=["anchor", "positive", "negative"])

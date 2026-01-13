@@ -1,1 +1,4 @@
 notebooks/upload_models.ipynb
+.env
+venv/*
+data/triplets/*
